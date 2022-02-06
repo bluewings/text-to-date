@@ -37,6 +37,9 @@ enum TextToken {
   ThisQuarter = 'thisquarter',
   LastQuarter = 'lastquarter',
   NextQuarter = 'nextquarter',
+  This = 'this',
+  Last = 'last',
+  Next = 'next',
 }
 
 const tokens = {
@@ -63,11 +66,11 @@ const tokens = {
   [TextToken.NextQuarter]: ['next quarter'],
 };
 
-const b____b = Object.entries(tokens)
-  .reduce(
-    (accum, [replace, terms]) => [...accum, ...terms.map((find) => ({ find, replace }))],
-    [] as { find: string; replace: string }[],
-  )
+const replacements = Object.entries(tokens)
+  .reduce((accum, [replace, terms]) => {
+    accum.push(...terms.map((find) => ({ find, replace })));
+    return accum;
+  }, [] as { find: string; replace: string }[])
   .sort((a, b) => (a.find.length === b.find.length ? 0 : a.find.length > b.find.length ? -1 : 1));
 
 const daysInWeek: string[] = [
@@ -89,119 +92,73 @@ export const textToDate = (text: string) => {
     return new Date(source);
   }
 
-  // console.log(bb);
-
-  // source.replace()
-  const ccc = b____b
-    .reduce((accu, e) => {
-      return accu.replace(e.find, e.replace);
-    }, source)
-    .split(' ');
+  const tokens = replacements.reduce((prev, { find, replace }) => prev.replace(find, replace), source).split(' ');
 
   const today = new Date();
 
-  if (ccc.includes(TextToken.StartOf) || ccc.includes(TextToken.EndOf)) {
-    let stdDate = new Date();
-    let isStart = ccc.includes(TextToken.StartOf);
-    let fn;
+  if (tokens.includes(TextToken.StartOf) || tokens.includes(TextToken.EndOf)) {
+    // (start|end) of (week|month|year|quarter)
+    let refDate = new Date();
+    let isStart = tokens.includes(TextToken.StartOf);
+    let transform;
 
-    if (ccc.includes(TextToken.ThisWeek)) {
-      // stdDate = addDays(today, -7);
-      stdDate = today;
-      fn = isStart ? startOfWeek : endOfWeek;
-    } else if (ccc.includes(TextToken.LastWeek)) {
-      stdDate = addDays(today, -7);
-      fn = isStart ? startOfWeek : endOfWeek;
-    } else if (ccc.includes(TextToken.NextWeek)) {
-      stdDate = addDays(today, 7);
-      fn = isStart ? startOfWeek : endOfWeek;
-    } else if (ccc.includes(TextToken.ThisMonth)) {
-      stdDate = today;
-      fn = isStart ? startOfMonth : endOfMonth;
-    } else if (ccc.includes(TextToken.LastMonth)) {
-      stdDate = addMonths(today, -1);
-      fn = isStart ? startOfMonth : endOfMonth;
-    } else if (ccc.includes(TextToken.NextMonth)) {
-      stdDate = addMonths(today, 1);
-      fn = isStart ? startOfMonth : endOfMonth;
-    } else if (ccc.includes(TextToken.ThisYear)) {
-      stdDate = today;
-      fn = isStart ? startOfYear : endOfYear;
-    } else if (ccc.includes(TextToken.LastYear)) {
-      stdDate = addYears(today, -1);
-      fn = isStart ? startOfYear : endOfYear;
-    } else if (ccc.includes(TextToken.NextYear)) {
-      stdDate = addYears(today, 1);
-      fn = isStart ? startOfYear : endOfYear;
-    } else if (ccc.includes(TextToken.ThisQuarter)) {
-      stdDate = today;
-      fn = isStart ? startOfQuarter : endOfQuarter;
-    } else if (ccc.includes(TextToken.LastQuarter)) {
-      stdDate = addQuarters(today, -1);
-      fn = isStart ? startOfQuarter : endOfQuarter;
-    } else if (ccc.includes(TextToken.NextQuarter)) {
-      stdDate = addQuarters(today, 1);
-      fn = isStart ? startOfQuarter : endOfQuarter;
+    if (tokens.includes(TextToken.ThisWeek)) {
+      refDate = today;
+      transform = isStart ? startOfWeek : endOfWeek;
+    } else if (tokens.includes(TextToken.LastWeek)) {
+      refDate = addDays(today, -7);
+      transform = isStart ? startOfWeek : endOfWeek;
+    } else if (tokens.includes(TextToken.NextWeek)) {
+      refDate = addDays(today, 7);
+      transform = isStart ? startOfWeek : endOfWeek;
+    } else if (tokens.includes(TextToken.ThisMonth)) {
+      refDate = today;
+      transform = isStart ? startOfMonth : endOfMonth;
+    } else if (tokens.includes(TextToken.LastMonth)) {
+      refDate = addMonths(today, -1);
+      transform = isStart ? startOfMonth : endOfMonth;
+    } else if (tokens.includes(TextToken.NextMonth)) {
+      refDate = addMonths(today, 1);
+      transform = isStart ? startOfMonth : endOfMonth;
+    } else if (tokens.includes(TextToken.ThisYear)) {
+      refDate = today;
+      transform = isStart ? startOfYear : endOfYear;
+    } else if (tokens.includes(TextToken.LastYear)) {
+      refDate = addYears(today, -1);
+      transform = isStart ? startOfYear : endOfYear;
+    } else if (tokens.includes(TextToken.NextYear)) {
+      refDate = addYears(today, 1);
+      transform = isStart ? startOfYear : endOfYear;
+    } else if (tokens.includes(TextToken.ThisQuarter)) {
+      refDate = today;
+      transform = isStart ? startOfQuarter : endOfQuarter;
+    } else if (tokens.includes(TextToken.LastQuarter)) {
+      refDate = addQuarters(today, -1);
+      transform = isStart ? startOfQuarter : endOfQuarter;
+    } else if (tokens.includes(TextToken.NextQuarter)) {
+      refDate = addQuarters(today, 1);
+      transform = isStart ? startOfQuarter : endOfQuarter;
     }
 
-    if (fn) {
-      return fn(stdDate);
+    if (transform) {
+      return transform(refDate);
     }
-    // }
-
-    // if (ccc.includes(TextToken.StartOf)) {
-    //   if (ccc.includes(TextToken.ThisWeek)) {
-    //     return startOfWeek(today);
-    //   } else if (ccc.includes(TextToken.LastWeek)) {
-    //     return startOfWeek(addDays(today, -7));
-    //   } else if (ccc.includes(TextToken.NextWeek)) {
-    //     return startOfWeek(addDays(today, 7));
-    //   } else if (ccc.includes(TextToken.ThisMonth)) {
-    //     return startOfMonth(today);
-    //   } else if (ccc.includes(TextToken.LastMonth)) {
-    //     return startOfMonth(addMonths(today, -1));
-    //   } else if (ccc.includes(TextToken.NextMonth)) {
-    //     return startOfMonth(addMonths(today, 1));
-    //   }
-    // } else if (ccc.includes(TextToken.EndOf)) {
-    //   if (ccc.includes(TextToken.ThisWeek)) {
-    //     return endOfWeek(today);
-    //   } else if (ccc.includes(TextToken.LastWeek)) {
-    //     return endOfWeek(addDays(today, -7));
-    //   } else if (ccc.includes(TextToken.NextWeek)) {
-    //     return endOfWeek(addDays(today, 7));
-    //   }
   } else {
-    // const day = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
-    const aaa = ccc.find((e) => daysInWeek.includes(e));
-    const dayofw = aaa ? daysInWeek.indexOf(aaa) : -1;
-    // console.log(ccc, dayofw);
-
-    // if (dayofw_) {
-
-    // }
-
-    if (dayofw !== -1) {
+    // (this|last|next) (sun|mon|tue|wed|thu|fri|sat|sun)
+    const nameOfDay = tokens.find((e) => daysInWeek.includes(e));
+    const day = nameOfDay ? daysInWeek.indexOf(nameOfDay) : -1;
+    if (day !== -1) {
       let week = new Date();
-      if (ccc.includes('last')) {
+      if (tokens.includes(TextToken.Last)) {
         week = addDays(week, -7);
-      } else if (ccc.includes('next')) {
+      } else if (tokens.includes(TextToken.Next)) {
         week = addDays(week, 7);
       }
-      return startOfDay(setDay(week, dayofw));
+      return startOfDay(setDay(week, day));
     }
-
-    // if (ccc.includes('this')) {
-    // }
   }
-
-  // source.
-
-  // source.match()
 
   return null;
 };
 
 const isValidDate = (date: Date) => !Number.isNaN(date.getTime());
-
-// 37라 7818

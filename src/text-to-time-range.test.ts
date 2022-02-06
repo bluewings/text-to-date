@@ -16,4 +16,11 @@ describe('default', () => {
       endOfYear(new Date()),
     ]);
   });
+
+  test('2011-11-11 ~ end of this year', () => {
+    expect(textToTimeRange('2011-11-11 ~ end of this year')).toEqual([
+      startOfDay(new Date('2011-11-11')),
+      endOfYear(new Date()),
+    ]);
+  });
 });
