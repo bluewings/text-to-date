@@ -1,8 +1,20 @@
 {
   "name": "text-to-date",
   "version": "1.0.0",
-  "description": "",
+  "author": {
+    "name": "Sung Won Cha",
+    "email": "mygenie3@naver.com"
+  },
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluewings/text-to-date.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "prestart": "rm -rf tsconfig.tsbuildinfo",
     "start": "rollup -c --watch",
@@ -10,9 +22,9 @@
     "build": "rollup -c",
     "test": "jest --verbose --watch"
   },
-  "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/preset-env": "^7.16.11",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-json": "^4.1.0",
